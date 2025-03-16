@@ -3,8 +3,6 @@
 #include <d3d9.h>
 #include "Memory.h"
 
-class Memory;
-
 namespace GUI {
     extern LPDIRECT3D9 d3d;
     extern LPDIRECT3DDEVICE9 d3dDevice;
@@ -12,7 +10,6 @@ namespace GUI {
     extern UINT resizeWidth, resizeHeight;
     extern D3DPRESENT_PARAMETERS d3dpp;
 
-    extern Memory memory;
 
     bool Initialize(HWND hWnd);
     void Shutdown();

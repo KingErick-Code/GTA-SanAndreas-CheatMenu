@@ -25,18 +25,30 @@ Memory::Memory() {
 		MessageBoxA(NULL, "Failed to get base address", "Error", MB_OK);
 	}
 
-	Health = new Address{ 0xB793E0, {}, *this };
+	Health = new Address{ 0xB6F5F0, {0x540}, *this };
+	MaxHealth = new Address{ 0xB6F5F0, {0x544}, *this };
+	Armor = new Address{ 0xB6F5F0 , {0x548}, *this };
 	Money = new Address{ 0xB7CE50, {}, *this };
 	TextBox = new Address{ 0xBAA7A0, {}, *this };
 	WantedLevel = new Address{ 0xBAA420, {}, *this };
+	MenuState = new Address{ 0xB7CB49 , {}, *this };
+	PlayerPosX = new Address{ 0xB6F5F0, {0x14, 0x30}, *this };
+	PlayerPosY = new Address{ 0xB6F5F0, {0x14, 0x34}, *this };
+	PlayerPosZ = new Address{ 0xB6F5F0, {0x14, 0x38}, *this };
 }
 
 Memory::~Memory() {
 	if (processHandle) CloseHandle(processHandle);
 	if (Health) delete Health;
+	if (MaxHealth) delete MaxHealth;
+	if (Armor) delete Armor;
 	if (Money) delete Money;
 	if (TextBox) delete TextBox;
 	if (WantedLevel) delete WantedLevel;
+	if (MenuState) delete MenuState;
+	if (PlayerPosX) delete PlayerPosX;
+	if (PlayerPosY) delete PlayerPosY;
+	if (PlayerPosZ) delete PlayerPosZ;
 }
 
 DWORD Memory::GetModuleBaseAddress(const char* moduleName, DWORD processID) {

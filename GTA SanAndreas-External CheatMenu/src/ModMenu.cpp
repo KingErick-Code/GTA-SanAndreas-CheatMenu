@@ -1,9 +1,9 @@
 #include "ModMenu.h"
 #include "myfonts.h"
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_dx9.h"
-#include "../imgui/imgui_impl_win32.h"
-#include <vector>
+
+Active ModOptions;
+Memory memory;
+bool messageShown = false;
 
 void CenterText(const char* text) {
 	ImVec2 textSize = ImGui::CalcTextSize(text);
@@ -88,34 +88,91 @@ void SideBar(const std::vector<const char*>& labels, const ImVec2& sideBarSize, 
 	ImGui::Spacing();
 	for (size_t i = 0; i < labels.size(); i++) {
 		if (labels[i]) {
-			ImGui::Button(labels[i], buttonSize);
+			if (ImGui::Button(labels[i], buttonSize)) {
+				switch (i)
+				{
+				case 0:
+					ModOptions = Active::Player;
+					break;
+				case 1:
+					ModOptions = Active::Vehicle;
+					break;
+				default:
+					break;
+				}
+			}
 		}
 	}
 	ImGui::EndChild();
 }
 
+void PlayerGodMode(float& maxHealth) {
+	memory.Freeze(memory.Health->pointsAddress, maxHealth);
+	memory.Freeze(memory.Armor->pointsAddress, 255.0f);
+}
+
 void RenderModMenu() {
+
+	static float health, maxHealth = 0.0f;
+	static float armor = 0.0f;
+	static CVector playerPosition(0.0f, 0.0f, 0.0f);
+
+	static bool playerGodMode = false;
+
+	static bool initialized = false;
+	static byte menuState = false;
+
+	if (!initialized) {
+		memory.ReadMemory(memory.Health->pointsAddress, health);
+		memory.ReadMemory(memory.Armor->pointsAddress, armor);
+		initialized = true;
+	}
+	else {
+		memory.ReadMemory(memory.MenuState->pointsAddress, menuState);
+		memory.ReadMemory(memory.MaxHealth->pointsAddress, maxHealth);
+		memory.ReadMemory(memory.PlayerPosX->pointsAddress, playerPosition.x);
+		memory.ReadMemory(memory.PlayerPosY->pointsAddress, playerPosition.y);
+		memory.ReadMemory(memory.PlayerPosZ->pointsAddress, playerPosition.z);
+	}
+
+	// Display Message Once
+	if (!menuState && !messageShown) {
+		memory.WriteMemory(memory.TextBox->pointsAddress, "Cheat Menu connected V1.0.0");
+		messageShown = true;
+	}
+
+	// ImGui UI
 	ImVec2 windowSize = ImGui::GetIO().DisplaySize;
 	ImGui::SetNextWindowSize(windowSize);
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	if (ImGui::Begin("San Andreas Mod Menu", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
 
-		// Define Sidebar width
+		// Sidebar Navigation
 		float sidebarWidth = 150.0f;
 		float sidebarHeight = windowSize.y - 20;
 		ImVec2 buttonSize(sidebarWidth - 20, 40);
-
-		// Sidebar - Navigation
 		SideBar({ "Player", "Vehicle" }, ImVec2(sidebarWidth, sidebarHeight), buttonSize);
-
 		ImGui::SameLine();
 
-		// Main Panel - Mod Options
+		// Mainpanel
 		ImGui::BeginChild("MainPanel", ImVec2(0.0f, sidebarHeight), true);
 		CenterText("MOD OPTIONS");
 		ImGui::Separator();
+		ImGui::Spacing();
 
+		switch (ModOptions) {
+		case Player:
+			ImGui::Checkbox("GodMode", &playerGodMode);
+			break;
+		case Vehicle:
+			break;
+		default:
+			break;
+		}
+
+		if (playerGodMode && !menuState) PlayerGodMode(maxHealth);
 		ImGui::EndChild();
 	}
 	ImGui::End();
+
 }

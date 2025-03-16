@@ -9,47 +9,57 @@ class Memory
 	HANDLE processHandle = NULL;
 	DWORD procID = NULL;
 	DWORD gameBaseAddress = NULL;
-	HWND gameWindow = FindWindow(NULL, "GTA: San Andreas");
+    HWND gameWindow = FindWindow(NULL, "GTA: San Andreas");
 
     struct Address {
         DWORD offsetToBaseAddress;
         std::vector<DWORD> offsets;
-        DWORD baseAddress = 0;
-        DWORD pointsAddress = 0;
+        DWORD baseAddress = NULL;
+        DWORD pointsAddress = NULL;
 
         Address(DWORD offsetToBaseAddress, const std::vector<DWORD>& offsets, Memory& memory)
             : offsetToBaseAddress(offsetToBaseAddress), offsets(offsets) {
 
-            // If no offsets, use the direct address
-            if (offsets.empty()) {
+            if (offsets.empty())
+            {
                 pointsAddress = offsetToBaseAddress;
                 return;
             }
 
-            // Read the base address from the game's memory
-            if (!ReadProcessMemory(memory.processHandle, (LPVOID)(memory.gameBaseAddress + offsetToBaseAddress), &baseAddress, sizeof(baseAddress), NULL)) {
-                MessageBoxA(NULL, "Failed to read base address", "Error", MB_OK);
+            // Step 1: Read the base pointer first
+            baseAddress = offsetToBaseAddress;
+            if (!ReadProcessMemory(memory.processHandle, (LPCVOID)baseAddress, &pointsAddress, sizeof(pointsAddress), nullptr)) {
+                MessageBoxA(NULL, "Failed to read base address", "Error", MB_OK | MB_ICONERROR);
                 return;
             }
 
-            pointsAddress = baseAddress;
-
-            // Resolve the pointer chain
-            for (size_t i = 0; i < offsets.size(); i++) {
-                if (!ReadProcessMemory(memory.processHandle, (LPVOID)(pointsAddress + offsets[i]), &pointsAddress, sizeof(pointsAddress), NULL)) {
+            for (int i = 0; i < offsets.size() - 1; i++)
+            {
+                if (!ReadProcessMemory(memory.processHandle, (LPVOID)(pointsAddress + offsets[i]), &pointsAddress, sizeof(pointsAddress), NULL))
+                {
                     MessageBoxA(NULL, "Failed to read memory with offsets", "Error", MB_OK);
                     return;
                 }
             }
+
+            pointsAddress += offsets.at(offsets.size() - 1);
         }
     };
 
 
+
 public:
-	Address* Health;
+    Address* Health;
+    Address* Armor;
+    Address* MaxHealth;
 	Address* Money;
     Address* TextBox;
+    Address* MenuState;
     Address* WantedLevel;
+    Address* PlayerPosX;
+    Address* PlayerPosY;
+    Address* PlayerPosZ;
+
 
 public:
 	Memory();

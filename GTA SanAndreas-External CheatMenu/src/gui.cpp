@@ -1,10 +1,10 @@
 #include "gui.h"
+#include "ModMenu.h"
 #include <Windows.h>
 #include <tchar.h>
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_dx9.h"
 #include "../imgui/imgui_impl_win32.h"
-#include "ModMenu.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -14,8 +14,6 @@ bool GUI::deviceLost = false;
 UINT GUI::resizeWidth = 800;
 UINT GUI::resizeHeight = 600;
 D3DPRESENT_PARAMETERS GUI::d3dpp = {};
-Memory GUI::memory;
-bool messageShown;
 
 bool GUI::Initialize(HWND hWnd) {
 	if (!CreateDeviceD3D(hWnd)) return false;
@@ -32,8 +30,6 @@ bool GUI::Initialize(HWND hWnd) {
 	io.Fonts->AddFontDefault();
 	LoadCustomFont(io);
 	SetCustomTheme();
-
-	messageShown = false;
 	return true;
 }
 
