@@ -1,11 +1,11 @@
 #include "gui.h"
 
-#ifdef _CONSOLE
+#ifdef _DEBUG
 int main(int, char**) {
 #else
 #include <windows.h>
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-#endif // _CONSOLE
+#endif // _DEBUG
 
 	WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, GUI::WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"GTA San Andreas Cheat Menu", nullptr };
 	::RegisterClassExW(&wc);
